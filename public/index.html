@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local_teen patti System Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="top-branding-bar">Local_teen patti</div>
+
+    <div class="game-container">
+        
+        <div id="auth-box" class="glass-login-card">
+            <div class="brand-sub-header">Your logo</div>
+            <h1 class="login-title">Login</h1>
+            
+            <div class="input-wrapper">
+                <label>Email</label>
+                <input type="email" id="form-email" placeholder="username@gmail.com">
+            </div>
+            
+            <div class="input-wrapper">
+                <label>Password</label>
+                <input type="password" id="form-pass" placeholder="Password">
+            </div>
+            
+            <div class="forgot-pass">Forgot Password?</div>
+            <button id="email-signin-btn" class="classic-signin-btn">Sign in</button>
+            <div class="divider-text">or continue with</div>
+            
+            <div class="social-wrapper">
+                <button id="g-btn" class="google-pill-button">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                    <span>Google</span>
+                </button>
+            </div>
+            
+            <div class="register-footer">
+                Don't have an account? <span id="toggle-register-action">Register for free</span>
+            </div>
+            <p id="auth-err-log" style="color:#ff6b6b; font-size:12px; margin-top:10px; font-weight:bold; text-align:center;"></p>
+        </div>
+
+        <div id="dashboard-box" class="hidden" style="width:100%;">
+            <div class="card profile-strip">
+                <div class="avatar-icon" id="user-avatar">?</div>
+                <div style="flex-grow: 1;">
+                    <h3 id="dash-username" style="margin:0;">Profile Loading...</h3>
+                    <p id="dash-id" style="margin:4px 0; font-size:12px; color:#ffb300; font-weight: bold;"></p>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:5px;">
+                        <span id="dash-chips" class="chip-pill">🪙 0</span>
+                        <span id="dash-level" class="level-badge-pill">Level 1</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="logout-style">Logout</button>
+            </div>
+
+            <div class="card stats-grid-panel">
+                <div class="kpi-box">
+                    <div class="kpi-val" id="stat-played">0</div>
+                    <div class="kpi-lbl">Games Played</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-val" id="stat-won">0</div>
+                    <div class="kpi-lbl">Games Won</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-val" id="stat-ratio">0%</div>
+                    <div class="kpi-lbl">Win Rate</div>
+                </div>
+            </div>
+
+            <div class="grid-panel">
+                <div class="card sub-panel">
+                    <h3>👥 Friends Hub</h3>
+                    <div style="display:flex; gap:4px; margin-bottom:12px;">
+                        <input type="text" id="search-id-input" placeholder="Search unique Player ID">
+                        <button id="search-find-btn" style="width:70px; padding:0; margin:0; background:#ffb300; color:#111;">Find</button>
+                    </div>
+                    <div id="search-output" style="font-size:12px; margin-bottom:10px;"></div>
+                    
+                    <h4>Pending Requests Alerts</h4>
+                    <div id="requests-box"></div>
+                    
+                    <h4>My Friends Matrix (Click to Chat)</h4>
+                    <div id="friends-box"></div>
+                </div>
+
+                <div class="card sub-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <h3>🎰 Tables Broker</h3>
+                        <button id="cmd-create-table" style="background:#2e7d32; color:white;">Create Private Table</button>
+                        <div style="display:flex; gap:4px; margin-top:8px;">
+                            <input type="text" id="join-table-input" placeholder="Enter Table Room ID">
+                            <button id="cmd-join-table" style="width:70px; margin:0; padding:0; background:#ffb300; color:#111;">Join</button>
+                        </div>
+                    </div>
+
+                    <div id="dash-chat-container" class="hidden" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                        <h4 id="dash-chat-header" style="margin:0 0 8px 0; color:#ffb300;">Chatting with: --</h4>
+                        <div id="dash-chat-logs" class="chat-logs-viewport"></div>
+                        <div style="display:flex; gap:4px; margin-top:5px;">
+                            <input type="text" id="dash-chat-input" placeholder="Type a message..." style="padding:8px;">
+                            <button id="dash-chat-send" style="width:60px; font-size:12px; padding:0; margin:0; background: var(--casino-gold); color: #000;">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="super-admin-panel" class="card hidden" style="border: 1px solid #ff3d00; text-align: left; margin-top:20px;">
+                <h3 style="color:#ff3d00; margin-top:0;">🛡️ Super Admin Control Management Console</h3>
+                <h4>Registered Member Profiles Directory & Surveillance Caches</h4>
+                <div id="adm-profiles-container" style="display:grid; grid-template-columns:1fr; gap:15px;">
+                    </div>
+            </div>
+        </div>
+
+        <div id="table-canvas" class="card hidden" style="width:100%; max-width:700px; display:grid; grid-template-columns: 1fr 240px; gap:15px;">
+            <div>
+                <h2 id="room-header-title" style="font-size:20px;">Room Table ID: --</h2>
+                <div class="table-info"><span id="pot-display">💰 Pot: 0</span></div>
+                <h3 id="turn-indicator">Waiting...</h3>
+                
+                <div class="hand-container">
+                    <div id="cards-row"><div class="game-card">?</div><div class="game-card">?</div><div class="game-card">?</div></div>
+                    <button id="see-cards-btn">See Cards</button>
+                </div>
+
+                <div class="actions-grid">
+                    <button id="chaal-btn" class="action-btn">Chaal</button>
+                    <button id="show-btn" class="action-btn show-style">Show</button>
+                    <button id="pack-btn" class="action-btn pack">Pack</button>
+                </div>
+                <button id="dealer-start-btn" class="hidden" style="background:#ffb300; margin-top:15px; color:#000; width:100%;">🃏 Deal Cards</button>
+                <h4 style="margin:15px 0 5px 0;">Table Active Seats:</h4>
+                <div id="table-seats-list"></div>
+            </div>
+
+            <div class="table-chat-sidebar" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <h4 style="margin:0 0 10px 0; color:#ffb300; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">💬 Table Chat</h4>
+                    <div id="table-chat-logs" class="chat-logs-viewport" style="height:280px;"></div>
+                </div>
+                <div style="display:flex; gap:4px; margin-top:5px;">
+                    <input type="text" id="table-chat-input" placeholder="Text table..." style="padding:6px; font-size:12px;">
+                    <button id="table-chat-send" style="width:50px; font-size:11px; padding:0; margin:0; background: var(--casino-gold); color: #000;">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="endgame-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <h2 id="modal-winner-msg" style="color:#ffb300; margin-top:0;">Winner Announcement</h2>
+                <p id="modal-reason-msg">Details</p>
+                <hr style="border-color:#333; margin:15px 0;">
+                <button id="modal-replay-btn" style="background:#2e7d32; color:white;">🔄 Replay / Next Round</button>
+                <button id="modal-home-btn" style="background:#c62828; color:white; margin-top:8px;">🏠 Leave & Return Home</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script> window.socket = io(); </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfUZbWQB70FMj-HIZhxxSbYbUfPPRRmJY",
+            authDomain: "local-teen-patti.firebaseapp.com",
+            projectId: "local-teen-patti",
+            storageBucket: "local-teen-patti.firebasestorage.app",
+            messagingSenderId: "230970714828",
+            appId: "1:230970714828:web:2013a20c6919bba728b069",
+            measurementId: "G-QBT2NTMGTG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.triggerGoogleAuth = function() {
+            signInWithPopup(auth, provider).then(async (result) => {
+                const user = result.user;
+                const res = await fetch('/api/google-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: user.displayName, email: user.email })
+                });
+                myProfile = await res.json();
+                localStorage.setItem('tp_user_profile', JSON.stringify(myProfile));
+                executeLoginPipeline(myProfile);
+            }).catch(err => alert("Google Sign-In Failed: " + err.message));
+        }
+
+        window.triggerGoogleSignout = function() { 
+            localStorage.clear();
+            signOut(auth).then(() => { location.reload(); }); 
+        }
+    </script>
+
+    <script>
+        const socket = window.socket; 
+        let myProfile = null;
+        let activeTable = null;
+        let myCards = [];
+        let cardsVisible = false;
+        let isRegisterMode = false;
+        let activeChatFriend = null;
+        let cachedAdminPayload = null; 
+
+        document.getElementById('g-btn').addEventListener('click', () => { window.triggerGoogleAuth(); });
+        document.getElementById('logout-btn').addEventListener('click', () => { window.triggerGoogleSignout(); });
+
+        const toggleAction = document.getElementById('toggle-register-action');
+        const emailSubmitBtn = document.getElementById('email-signin-btn');
+        const authErrLog = document.getElementById('auth-err-log');
+
+        toggleAction.addEventListener('click', () => {
+            isRegisterMode = !isRegisterMode;
+            document.querySelector('.login-title').innerText = isRegisterMode ? "Register" : "Login";
+            emailSubmitBtn.innerText = isRegisterMode ? "Register for free" : "Sign in";
+            toggleAction.innerText = isRegisterMode ? "Login here" : "Register for free";
+        });
+
+        emailSubmitBtn.addEventListener('click', async () => {
+            const email = document.getElementById('form-email').value.trim();
+            const password = document.getElementById('form-pass').value;
+            if(!email || !password) return alert("Fill parameters.");
+
+            const endpoint = isRegisterMode ? '/api/email-register' : '/api/email-login';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if(data.error) {
+                authErrLog.innerText = data.error;
+            } else {
+                myProfile = data;
+                localStorage.setItem('tp_user_profile', JSON.stringify(myProfile));
+                executeLoginPipeline(myProfile);
+            }
+        });
+
+        // 🛠️ ATTACH SCOPE ATTACHMENTS FOR BUTTON ACTIONS
+        window.sendRequest = function(pid) {
+            socket.emit('send-friend-request', pid);
+            document.getElementById('search-output').innerText = "Request sent successfully! 🚀";
+        }
+
+        window.respond = function(requester, action) {
+            socket.emit('respond-request', { requester, action });
+        }
+
+        function executeLoginPipeline(profileData) {
+            myProfile = profileData;
+            socket.emit('register-socket', myProfile.username);
+            document.getElementById('auth-box').classList.add('hidden');
+            
+            const savedTableId = localStorage.getItem('tp_active_table_id');
+            if (savedTableId) socket.emit('join-table', savedTableId);
+            else document.getElementById('dashboard-box').classList.remove('hidden');
+            
+            document.getElementById('user-avatar').innerText = myProfile.username.charAt(0).toUpperCase();
+            triggerProfileReload();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('tp_user_profile');
+            if(savedSession) executeLoginPipeline(JSON.parse(savedSession));
+        });
+
+        function triggerProfileReload() {
+            if(myProfile) socket.emit('get-latest-profile', myProfile.username);
+        }
+
+        socket.on('refresh-profile-data', () => { triggerProfileReload(); });
+        socket.on('force-logout-eviction', () => { window.triggerGoogleSignout(); });
+
+        function populateAdminDirectory(usersObj, allChats) {
+            const container = document.getElementById('adm-profiles-container');
+            if (!container) return; 
+
+            const users = usersObj;
+            const chats = allChats || {};
+
+            container.innerHTML = Object.values(users).map(u => {
+                let aggregatedChatsHtml = "";
+                Object.keys(chats).forEach(key => {
+                    if(key.includes(u.username)) {
+                        let participants = key.split("%%");
+                        let targetFriend = participants.find(p => p !== u.username) || "Self";
+                        aggregatedChatsHtml += `
+                            <div style="background:rgba(0,0,0,0.3); padding:6px; margin-top:5px; border-radius:6px; font-size:11px;">
+                                <b style="color:#ffb300;">Convo with ${targetFriend}:</b>
+                                ${chats[key].map(m => `<br>&nbsp;&nbsp;[${m.time}] <b>${m.sender}:</b> ${m.msg}`).join('')}
+                            </div>`;
+                    }
+                });
+
+                if(!aggregatedChatsHtml) aggregatedChatsHtml = "<p style='font-size:11px; color:#aaa; margin:5px 0 0 0;'>No active chat history found.</p>";
+
+                return `
+                    <div class="admin-profile-luxe-card" style="margin-top: 15px;">
+                        <div class="adm-card-header">
+                            <div>
+                                <h3 style="margin:0; color:#ffb300;">👤 Username: ${u.username}</h3>
+                                <small style="color:#aaa;">📧 Gmail: ${u.email}</small><br>
+                                <small style="color:#aaa;">🔑 Password: <b style="color:#ff6b6b; background:rgba(0,0,0,0.4); padding:2px 5px; border-radius:4px;">${u.password || 'N/A'}</b></small>
+                            </div>
+                            <div style="text-align:right;">
+                                <span class="chip-pill" style="font-size:14px; display:inline-block; padding:3px 10px;">🪙 Wallet: ${u.chips}</span><br>
+                                <small style="color:#4fc3f7; font-weight:bold; display:block; margin-top:5px;">Player Level: ${u.stats?.level || 1}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="adm-card-stats-row">
+                            <div><b>Played:</b> ${u.stats?.gamesPlayed || 0}</div>
+                            <div><b>Won:</b> ${u.stats?.gamesWon || 0}</div>
+                            <div><b>Win Rate:</b> ${u.stats?.winPercentage || 0}%</div>
+                        </div>
+
+                        <div class="adm-surveillance-chat-box">
+                            <h5>🔍 Surveillance Log: Private Chat Transcripts</h5>
+                            ${aggregatedChatsHtml}
+                        </div>
+
+                        <div class="adm-card-actions-row">
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="number" id="amt-${u.playerId}" placeholder="Chips" style="padding:6px; width:80px; font-size:12px; margin:0; background:#070b11;">
+                                <button onclick="adminAddChips('${u.playerId}')" style="background:#2e7d32; color:white; padding:6px 12px; font-size:12px; width:auto; margin:0;">+ Add</button>
+                            </div>
+                            <button onclick="adminRemoveUser('${u.playerId}')" style="background:#c62828; color:white; padding:6px 12px; font-size:12px; width:auto; margin:0;">❌ Delete Account</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        socket.on('admin-users-data', (payload) => { 
+            cachedAdminPayload = payload;
+            populateAdminDirectory(payload.users, payload.chats); 
+        });
+        
+        socket.on('refresh-admin-dashboard', (payload) => { 
+            cachedAdminPayload = payload;
+            populateAdminDirectory(payload.users, payload.chats); 
+        });
+
+        socket.on('profile-data-update', (data) => {
+            myProfile = data;
+            localStorage.setItem('tp_user_profile', JSON.stringify(myProfile));
+
+            document.getElementById('dash-username').innerText = data.username;
+            document.getElementById('dash-id').innerText = `Player ID: ${data.playerId}`;
+            document.getElementById('dash-chips').innerText = `🪙 Balance: ${data.chips}`;
+            
+            const stats = data.stats || { gamesPlayed: 0, gamesWon: 0, winPercentage: 0, level: 1 };
+            document.getElementById('dash-level').innerText = `Level ${stats.level}`;
+            document.getElementById('stat-played').innerText = stats.gamesPlayed;
+            document.getElementById('stat-won').innerText = stats.gamesWon;
+            document.getElementById('stat-ratio').innerText = `${stats.winPercentage}%`;
+
+            const fb = document.getElementById('friends-box');
+            fb.innerHTML = data.friends.length ? data.friends.map(f => `
+                <div class='player-badge hover-clickable' onclick="openFriendChat('${f}')">👤 <b>${f}</b> <span style="font-size:10px; color:#ffb300;">💬 Click to Text</span></div>
+            `).join('') : '<p style="font-size:11px;color:#aaa;">No friends linked yet.</p>';
+
+            const rb = document.getElementById('requests-box');
+            rb.innerHTML = data.requests.map(r => `
+                <div class='player-badge' style='display:flex; justify-content:space-between; align-items:center;'>
+                    <span>${r}</span>
+                    <div>
+                        <button onclick="respond('${r}','accept')" style='width:52px; padding:4px; font-size:10px; background:#2e7d32; color:white; margin:0; display:inline-block;'>Accept</button>
+                        <button onclick="respond('${r}','reject')" style='width:52px; padding:4px; font-size:10px; background:#c62828; color:white; margin:0; display:inline-block;'>Deny</button>
+                    </div>
+                </div>
+            `).join('');
+
+            const adminBox = document.getElementById('super-admin-panel');
+            if(data.isAdmin === true || data.email.toLowerCase() === "anuragnarkhede02@gmail.com") {
+                adminBox.classList.remove('hidden');
+                adminBox.style.display = "block";
+                
+                if(cachedAdminPayload) {
+                    populateAdminDirectory(cachedAdminPayload.users, cachedAdminPayload.chats);
+                }
+            } else {
+                adminBox.classList.add('hidden');
+                adminBox.style.display = "none";
+            }
+        });
+
+        // 💬 DASHBOARD FRIENDS REALTIME MESSAGING CORE LOGIC
+        function openFriendChat(friendName) {
+            activeChatFriend = friendName;
+            document.getElementById('dash-chat-container').classList.remove('hidden');
+            document.getElementById('dash-chat-header').innerText = `Chatting with: ${friendName}`;
+            socket.emit('get-friend-chat-history', { friendName });
+        }
+
+        document.getElementById('dash-chat-send').addEventListener('click', () => {
+            const input = document.getElementById('dash-chat-input');
+            const txt = input.value.trim();
+            if(txt && activeChatFriend) {
+                socket.emit('send-friend-message', { friendName: activeChatFriend, messageText: txt });
+                input.value = "";
+            }
+        });
+
+        socket.on('friend-chat-history-loaded', ({ friendName, history }) => {
+            if(activeChatFriend !== friendName) return;
+            renderChatBubbleLogs('dash-chat-logs', history);
+        });
+
+        socket.on('inbound-friend-msg', ({ friendName, msgObj }) => {
+            if(activeChatFriend === friendName) {
+                const logs = document.getElementById('dash-chat-logs');
+                logs.innerHTML += `
+                    <div class="msg-bubble ${msgObj.sender === myProfile.username ? 'me' : 'them'}">
+                        <small><b>${msgObj.sender}</b> [${msgObj.time}]</small><div>${msgObj.msg}</div>
+                    </div>`;
+                logs.scrollTop = logs.scrollHeight;
+            }
+        });
+
+        // 💬 LIVE GAMEPLAY MAT IN-GAME CHAT CHANNEL BINDINGS
+        document.getElementById('table-chat-send').addEventListener('click', () => {
+            const input = document.getElementById('table-chat-input');
+            const txt = input.value.trim();
+            if(txt && activeTable) {
+                socket.emit('send-table-chat', { tableId: activeTable.id, messageText: txt });
+                input.value = "";
+            }
+        });
+
+        socket.on('inbound-table-msg', (msgObj) => {
+            const logs = document.getElementById('table-chat-logs');
+            logs.innerHTML += `
+                <div class="msg-bubble ${msgObj.sender === myProfile.username ? 'me' : 'them'}">
+                    <small><b>${msgObj.sender}</b> [${msgObj.time}]</small><div>${msgObj.msg}</div>
+                </div>`;
+            logs.scrollTop = logs.scrollHeight;
+        });
+
+        function renderChatBubbleLogs(targetElementId, historyArray) {
+            const logs = document.getElementById(targetElementId);
+            logs.innerHTML = historyArray.map(m => `
+                <div class="msg-bubble ${m.sender === myProfile.username ? 'me' : 'them'}">
+                    <small><b>${m.sender}</b> [${m.time || ''}]</small><div>${m.msg}</div>
+                </div>
+            `).join('');
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function adminAddChips(pid) {
+            const el = document.getElementById(`amt-${pid}`);
+            const val = el.value;
+            if(val && val > 0) socket.emit('admin-add-chips-action', { targetPlayerId: pid, chipAmount: val });
+        }
+
+        function adminRemoveUser(pid) {
+            if(confirm("⚠️ CRUCIAL: Are you absolutely sure you want to permanently delete this user account from the registry?")) {
+                socket.emit('admin-remove-user-action', { targetPlayerId: pid });
+            }
+        }
+
+        // MATCHMAKING LOBBIES GENERAL PIPELINES
+        document.getElementById('search-find-btn').addEventListener('click', () => {
+            const sid = document.getElementById('search-id-input').value.trim();
+            if(sid) socket.emit('search-friend', sid);
+        });
+
+        socket.on('search-result', (res) => {
+            const out = document.getElementById('search-output');
+            if(res.error) { out.style.color="#ff5252"; out.innerText = res.error; }
+            else {
+                out.style.color="#4caf50";
+                out.innerHTML = `${res.username} found! <button onclick="sendRequest('${res.playerId}')" style='padding:2px 5px; font-size:11px; width:auto; display:inline; background:#ffb300; color:#111;'>Add Friend</button>`;
+            }
+        });
+
+        document.getElementById('cmd-create-table').addEventListener('click', () => { socket.emit('create-table'); });
+        document.getElementById('cmd-join-table').addEventListener('click', () => {
+            const tid = document.getElementById('join-table-input').value.trim();
+            if(tid) socket.emit('join-table', tid);
+        });
+
+        socket.on('table-joined', (tableObj) => {
+            activeTable = tableObj;
+            localStorage.setItem('tp_active_table_id', tableObj.id);
+            document.getElementById('dashboard-box').classList.add('hidden');
+            document.getElementById('table-canvas').classList.remove('hidden');
+            document.getElementById('room-header-title').innerText = `Room Table ID: ${tableObj.id}`;
+            document.getElementById('table-chat-logs').innerHTML = ""; 
+            updateTableUI(tableObj);
+        });
+
+        socket.on('table-updated', (t) => { activeTable = t; updateTableUI(t); });
+        socket.on('match-started', (t) => { activeTable = t; updateTableUI(t); });
+        socket.on('match-state-updated', (t) => { activeTable = t; updateTableUI(t); });
+
+        function updateTableUI(t) {
+            document.getElementById('pot-display').innerText = `💰 Total Table Pot: ${t.pot}`;
+            const seatList = document.getElementById('table-seats-list');
+            seatList.innerHTML = t.players.map(p => `
+                <div class="player-badge">👤 ${p.username} (🪙${p.chips}) - <b style='color:#ffb300;'>${p.status.toUpperCase()}</b></div>
+            `).join('');
+
+            const mySeat = t.players.find(p => p.username === myProfile.username);
+            
+            if (t.isActive && mySeat && mySeat.status === 'playing') {
+                myCards = mySeat.cards;
+                const activeTurnUser = t.players[t.currentTurnIndex];
+                if (activeTurnUser.username === myProfile.username) {
+                    document.getElementById('turn-indicator').innerText = "🟢 YOUR TURN ACTION REQUIRED";
+                    document.getElementById('chaal-btn').disabled = false;
+                    document.getElementById('pack-btn').disabled = false;
+                    document.getElementById('show-btn').disabled = (t.players.filter(p=>p.status==='playing').length !== 2);
+                } else {
+                    document.getElementById('turn-indicator').innerText = `⏳ Waiting for ${activeTurnUser.username}...`;
+                    document.getElementById('chaal-btn').disabled = true;
+                    document.getElementById('pack-btn').disabled = true;
+                    document.getElementById('show-btn').disabled = true;
+                }
+            } else {
+                document.getElementById('chaal-btn').disabled = true;
+                document.getElementById('pack-btn').disabled = true;
+                document.getElementById('show-btn').disabled = true;
+                if(!t.isActive) document.getElementById('turn-indicator').innerText = "Waiting for Host to deal cards...";
+            }
+
+            if (t.host === socket.id && !t.isActive && t.players.length >= 2) {
+                document.getElementById('dealer-start-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('dealer-start-btn').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('dealer-start-btn').addEventListener('click', () => {
+            if(activeTable) socket.emit('start-table-match', activeTable.id);
+        });
+
+        document.getElementById('chaal-btn').addEventListener('click', () => { socket.emit('table-chaal', activeTable.id); });
+        document.getElementById('pack-btn').addEventListener('click', () => { socket.emit('table-pack', activeTable.id); });
+        document.getElementById('show-btn').addEventListener('click', () => { socket.emit('table-show', activeTable.id); });
+
+        document.getElementById('see-cards-btn').addEventListener('click', () => {
+            cardsVisible = !cardsVisible;
+            const crow = document.getElementById('cards-row');
+            if (cardsVisible && myCards.length) {
+                document.getElementById('see-cards-btn').innerText = "Hide Hand";
+                crow.innerHTML = myCards.map(c => `<div class="game-card ${c.color}">${c.label}${c.suit}</div>`).join('');
+            } else {
+                document.getElementById('see-cards-btn').innerText = "See Cards";
+                crow.innerHTML = `<div class="game-card">?</div>`.repeat(3);
+            }
+        });
+
+        socket.on('match-ended', (data) => {
+            document.getElementById('modal-winner-msg').innerText = `🎉 Winner: ${data.winner}`;
+            document.getElementById('modal-reason-msg').innerText = `${data.reason} swept a total of 🪙${data.pot} chips.`;
+            document.getElementById('endgame-modal').classList.remove('hidden');
+            cardsVisible = false;
+            document.getElementById('see-cards-btn').innerText = "See Cards";
+            document.getElementById('cards-row').innerHTML = `<div class="game-card">?</div>`.repeat(3);
+            triggerProfileReload();
+        });
+
+        document.getElementById('modal-replay-btn').addEventListener('click', () => {
+            document.getElementById('endgame-modal').classList.add('hidden');
+            socket.emit('ready-next-round', activeTable.id);
+        });
+
+        document.getElementById('modal-home-btn').addEventListener('click', () => {
+            document.getElementById('endgame-modal').classList.add('hidden');
+            document.getElementById('table-canvas').classList.add('hidden');
+            document.getElementById('dashboard-box').classList.remove('hidden');
+            localStorage.removeItem('tp_active_table_id');
+            socket.emit('leave-table-room', activeTable.id);
+            activeTable = null;
+        });
+
+        socket.on('table-error', (msg) => alert(msg));
+    </script>
+</body>
+</html>
