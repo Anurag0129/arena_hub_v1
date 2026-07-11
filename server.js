@@ -108,23 +108,28 @@ app.post('/api/google-auth', (req, res) => {
 
 app.post('/api/email-register', (req, res) => {
     const { email, password, username } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Missing fields!" });
+
     let db = loadDatabase();
-    let userKey = email.trim().replace(/[.$#[\]]/g, "_");
+    // 🪙 FIX: Force the lookup key to be lowercase
+    const cleanEmail = email.trim().toLowerCase();
+    let userKey = cleanEmail.replace(/[.$#[\]]/g, "_");
 
     if (db.users[userKey]) return res.status(400).json({ error: "Account already exists!" });
 
-    const finalUsername = (username && username.trim()) ? username.trim() : email.split('@')[0];
+    const finalUsername = (username && username.trim()) ? username.trim() : cleanEmail.split('@')[0];
     const uniqueId = "TP-" + crypto.randomBytes(3).toString('hex').toUpperCase();
     
-    const checkAdmin = (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_MASTER_PASSWORD);
+    // 🔐 VALIDATE BOTH EMAIL AND PASSWORD FOR ADMIN ROLE
+    const checkAdmin = (cleanEmail === ADMIN_EMAIL.toLowerCase() && password === ADMIN_MASTER_PASSWORD);
 
-    if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password !== ADMIN_MASTER_PASSWORD) {
+    if (cleanEmail === ADMIN_EMAIL.toLowerCase() && password !== ADMIN_MASTER_PASSWORD) {
         return res.status(400).json({ error: "Invalid password for the Master Admin account!" });
     }
 
     db.users[userKey] = {
         username: finalUsername,
-        email: email,
+        email: cleanEmail, // 🪙 FIX: Save the email as lowercase
         password: password, 
         chips: 1000,
         playerId: uniqueId,
@@ -139,16 +144,24 @@ app.post('/api/email-register', (req, res) => {
 
 app.post('/api/email-login', (req, res) => {
     const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Missing fields!" });
+
     let db = loadDatabase();
-    let userKey = email.trim().replace(/[.$#[\]]/g, "_");
+    // 🪙 FIX: Force the lookup key to be lowercase during login too
+    const cleanEmail = email.trim().toLowerCase();
+    let userKey = cleanEmail.replace(/[.$#[\]]/g, "_");
     let user = db.users[userKey];
 
-    if (!user || user.password !== password) return res.status(400).json({ error: "Invalid credentials!" });
+    // 🪙 FIX: Enforce clean checking against the stored parameters
+    if (!user || user.password !== password) {
+        return res.status(400).json({ error: "Invalid credentials!" });
+    }
     
+    // Double-check admin state validation upon login execution
     if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_MASTER_PASSWORD) {
         user.isAdmin = true;
     } else if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-        user.isAdmin = false;
+        user.isAdmin = false; 
     }
     
     saveDatabase(db);
