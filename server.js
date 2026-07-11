@@ -15,33 +15,39 @@ const DB_FILE = path.join(__dirname, 'database.json');
 app.use(express.static('public'));
 app.use(express.json());
 
-// Target Super Admin Configuration
 const ADMIN_EMAIL = "anuragnarkhede02@gmail.com";
-const ADMIN_MASTER_PASSWORD = "Anurag@29"; // 🔐 Double-locked Master Password
+const ADMIN_MASTER_PASSWORD = "Anurag@29";
+
+// 🪙 MEMORY RUNTIME CACHE LAYER TO PREVENT CORRUPTED ASYNC TURN DEADLOCKS
+let memoryDb = null;
 
 function loadDatabase() {
+    if (memoryDb) return memoryDb;
+    
     if (!fs.existsSync(DB_FILE)) {
-        // Fix: Explicitly initialize activeRooms on first boot to prevent undefined crashes
-        const initialData = { users: {}, chats: {}, activeRooms: {} };
-        fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-        return initialData;
+        memoryDb = { users: {}, chats: {}, activeRooms: {} };
+        fs.writeFileSync(DB_FILE, JSON.stringify(memoryDb, null, 2));
+        return memoryDb;
     }
     try {
-        let data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-        if (!data.users) data.users = {};
-        if (!data.chats) data.chats = {};
-        if (!data.activeRooms) data.activeRooms = {};
-        return data;
+        memoryDb = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        if (!memoryDb.users) memoryDb.users = {};
+        if (!memoryDb.chats) memoryDb.chats = {};
+        if (!memoryDb.activeRooms) memoryDb.activeRooms = {};
+        return memoryDb;
     } catch (e) {
-        // If file is corrupted or empty, reset gracefully
-        const fallbackData = { users: {}, chats: {}, activeRooms: {} };
-        fs.writeFileSync(DB_FILE, JSON.stringify(fallbackData, null, 2));
-        return fallbackData;
+        memoryDb = { users: {}, chats: {}, activeRooms: {} };
+        fs.writeFileSync(DB_FILE, JSON.stringify(memoryDb, null, 2));
+        return memoryDb;
     }
 }
 
 function saveDatabase(data) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+    memoryDb = data;
+    // Debounced or non-blocking write stream allocation
+    fs.writeFile(DB_FILE, JSON.stringify(data, null, 2), (err) => {
+        if (err) console.error("Database persistence write warning:", err);
+    });
 }
 
 // --- CORE STRATEGY INTERACTIVE MATCH ENGINE ---
@@ -111,7 +117,6 @@ app.post('/api/email-register', (req, res) => {
     if (!email || !password) return res.status(400).json({ error: "Missing fields!" });
 
     let db = loadDatabase();
-    // 🪙 FIX: Force the lookup key to be lowercase
     const cleanEmail = email.trim().toLowerCase();
     let userKey = cleanEmail.replace(/[.$#[\]]/g, "_");
 
@@ -120,7 +125,6 @@ app.post('/api/email-register', (req, res) => {
     const finalUsername = (username && username.trim()) ? username.trim() : cleanEmail.split('@')[0];
     const uniqueId = "TP-" + crypto.randomBytes(3).toString('hex').toUpperCase();
     
-    // 🔐 VALIDATE BOTH EMAIL AND PASSWORD FOR ADMIN ROLE
     const checkAdmin = (cleanEmail === ADMIN_EMAIL.toLowerCase() && password === ADMIN_MASTER_PASSWORD);
 
     if (cleanEmail === ADMIN_EMAIL.toLowerCase() && password !== ADMIN_MASTER_PASSWORD) {
@@ -129,7 +133,7 @@ app.post('/api/email-register', (req, res) => {
 
     db.users[userKey] = {
         username: finalUsername,
-        email: cleanEmail, // 🪙 FIX: Save the email as lowercase
+        email: cleanEmail,
         password: password, 
         chips: 1000,
         playerId: uniqueId,
@@ -147,17 +151,14 @@ app.post('/api/email-login', (req, res) => {
     if (!email || !password) return res.status(400).json({ error: "Missing fields!" });
 
     let db = loadDatabase();
-    // 🪙 FIX: Force the lookup key to be lowercase during login too
     const cleanEmail = email.trim().toLowerCase();
     let userKey = cleanEmail.replace(/[.$#[\]]/g, "_");
     let user = db.users[userKey];
 
-    // 🪙 FIX: Enforce clean checking against the stored parameters
     if (!user || user.password !== password) {
         return res.status(400).json({ error: "Invalid credentials!" });
     }
     
-    // Double-check admin state validation upon login execution
     if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_MASTER_PASSWORD) {
         user.isAdmin = true;
     } else if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
@@ -369,12 +370,13 @@ io.on('connection', (socket) => {
 
         let matchedRecord = Object.values(db.users).find(u => u && u.username === activePlayer.username);
         if (matchedRecord) matchedRecord.chips = activePlayer.chips;
-        saveDatabase(db);
 
+        // Advance index safely to the next live user node
         do {
             t.currentTurnIndex = (t.currentTurnIndex + 1) % t.players.length;
         } while (t.players[t.currentTurnIndex].status !== 'playing');
 
+        saveDatabase(db);
         io.to(tableId).emit('match-state-updated', t);
     });
 
@@ -410,7 +412,6 @@ io.on('connection', (socket) => {
         if (activePlayer.id !== socket.id) return;
 
         activePlayer.status = 'packed';
-        saveDatabase(db);
         let survivors = t.players.filter(p => p.status === 'playing');
 
         if (survivors.length === 1) {
@@ -422,6 +423,7 @@ io.on('connection', (socket) => {
             t.currentTurnIndex = (t.currentTurnIndex + 1) % t.players.length;
         } while (t.players[t.currentTurnIndex].status !== 'playing');
 
+        saveDatabase(db);
         io.to(tableId).emit('match-state-updated', t);
     });
 

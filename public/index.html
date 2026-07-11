@@ -278,9 +278,32 @@
             triggerProfileReload();
         }
 
+        // window.addEventListener('DOMContentLoaded', () => {
+        //     const savedSession = localStorage.getItem('tp_user_profile');
+        //     if (savedSession) executeLoginPipeline(JSON.parse(savedSession));
+        // });
+
+        // ✅ FIXED INITIALIZATION ROUTING: Stops authentication panel looping
         window.addEventListener('DOMContentLoaded', () => {
             const savedSession = localStorage.getItem('tp_user_profile');
-            if (savedSession) executeLoginPipeline(JSON.parse(savedSession));
+            if (savedSession) {
+                try {
+                    const parsedProfile = JSON.parse(savedSession);
+                    if (parsedProfile && parsedProfile.username) {
+                        isRegisterMode = false;
+                        executeLoginPipeline(parsedProfile);
+                        return; // Halt logic exit to prevent form resetting
+                    }
+                } catch(e) {
+                    localStorage.removeItem('tp_user_profile');
+                }
+            }
+            // If no profile token exists, default gracefully to Login form view
+            isRegisterMode = false;
+            document.querySelector('.login-title').innerText = "Login";
+            emailSubmitBtn.innerText = "Sign in";
+            toggleAction.innerText = "Register for free";
+            usernameBlock.classList.add('hidden');
         });
 
         function triggerProfileReload() { if (myProfile) socket.emit('get-latest-profile', myProfile.username); }
